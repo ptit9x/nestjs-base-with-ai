@@ -1,24 +1,25 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
-import { User } from './entities/user.entity.js';
+import type { User } from './users.repository.js';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto): User {
+  create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.create(createUserDto);
   }
 
   @Get('count')
-  count(): { count: number } {
-    return { count: this.usersService.count() };
+  async count(): Promise<{ count: number }> {
+    return { count: await this.usersService.count() };
   }
 
   @Get()
-  findAll(): User[] {
+  findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 }
+

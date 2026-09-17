@@ -1,26 +1,22 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto.js';
-import { User } from './entities/user.entity.js';
+import { Inject, Injectable } from '@nestjs/common';
+import type { CreateUserDto } from './dto/create-user.dto.js';
+import { USERS_REPOSITORY, type UsersRepository, type User } from './users.repository.js';
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [];
-  private idCounter = 1;
+  constructor(
+    @Inject(USERS_REPOSITORY) private readonly users: UsersRepository,
+  ) {}
 
-  create(createUserDto: CreateUserDto): User {
-    const newUser: User = {
-      id: this.idCounter++,
-      ...createUserDto,
-    };
-    this.users.push(newUser);
-    return newUser;
+  create(dto: CreateUserDto): Promise<User> {
+    return this.users.create(dto);
   }
 
-  findAll(): User[] {
-    return this.users;
+  findAll(): Promise<User[]> {
+    return this.users.findAll();
   }
 
-  count(): number {
-    return this.users.length;
+  count(): Promise<number> {
+    return this.users.count();
   }
 }

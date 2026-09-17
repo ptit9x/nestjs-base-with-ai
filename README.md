@@ -1,114 +1,496 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS Base with AI
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A production-ready NestJS 12 starter project built with **Prisma 8** (PostgreSQL), **TypeScript 6**, and modern tooling (Vitest, oxlint, Prettier). Features a clean layered architecture with repository pattern and dependency injection.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table of Contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [API Reference](#api-reference)
+- [Prisma 8 Workflow](#prisma-8-workflow)
+- [Database Migrations](#database-migrations)
+- [Testing](#testing)
+- [Scripts Reference](#scripts-reference)
+- [Configuration Files](#configuration-files)
+- [Tech Stack](#tech-stack)
+- [License](#license)
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## Prerequisites
 
-## Compile and run the project
+| Tool                                          | Version  |
+| --------------------------------------------- | -------- |
+| [Node.js](https://nodejs.org/)                | ≥ 20     |
+| [Docker](https://www.docker.com/) & Compose   | Latest   |
+| npm                                           | ≥ 10     |
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+## Getting Started
 
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+### 1. Clone & install
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone <repository-url>
+cd nestjs-base-with-ai
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 2. Configure environment
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.example .env
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Edit `.env` — set real values for `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and make sure `DATABASE_URL` uses the same credentials.
 
-## Observability
+> **Note:** `.env` is git-ignored. Only `.env.example` (with placeholders) is tracked.
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+### 3. Start PostgreSQL
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+```bash
+docker compose -f docker-compose.postgres.yml up -d
+```
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+Manage the database container:
 
-## Resources
+```bash
+# Stop (preserves data)
+docker compose -f docker-compose.postgres.yml down
 
-Check out a few resources that may come in handy when working with NestJS:
+# Stop and DELETE all data
+docker compose -f docker-compose.postgres.yml down -v
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 4. Run database migrations
 
-## Support
+```bash
+npm run db:migrate
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 5. Start the application
 
-## Stay in touch
+```bash
+# Development (watch mode — recommended)
+npm run start:dev
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Standard
+npm run start
+
+# Production
+npm run build && npm run start:prod
+```
+
+The app is available at **http://localhost:3000**.
+
+---
+
+## Environment Variables
+
+All variables are validated at startup via `class-validator`. The app **will not start** if required variables are missing or invalid.
+
+| Variable             | Required | Default       | Description                                    |
+| -------------------- | -------- | ------------- | ---------------------------------------------- |
+| `NODE_ENV`           | ✅        | `development` | `development` · `production` · `test`          |
+| `PORT`               | ✅        | `3000`        | HTTP listen port (must be ≥ 1)                 |
+| `DATABASE_URL`       | ✅        | —             | PostgreSQL connection string                   |
+| `POSTGRES_IMAGE`     | ✅*       | —             | Docker image (e.g. `postgres:18-alpine`)       |
+| `POSTGRES_USER`      | ✅*       | —             | DB username (Docker Compose)                   |
+| `POSTGRES_PASSWORD`  | ✅*       | —             | DB password (Docker Compose)                   |
+| `POSTGRES_DB`        | ✅*       | —             | DB name (Docker Compose)                       |
+| `POSTGRES_HOST_PORT` | ✅*       | —             | Host port mapped to container 5432             |
+
+> \* Only required when running the Docker Compose file for local PostgreSQL.
+
+Validation logic: [`src/config/env.validation.ts`](src/config/env.validation.ts)
+
+---
+
+## Project Structure
+
+```
+nestjs-base-with-ai/
+├── src/
+│   ├── main.ts                              # Bootstrap & global pipes
+│   ├── app.module.ts                        # Root module (config, DB, feature modules)
+│   ├── app.controller.ts                    # GET / → "Hello World!"
+│   ├── app.service.ts                       # Root service
+│   ├── app.controller.spec.ts               # Unit test for AppController
+│   │
+│   ├── config/
+│   │   ├── app.config.ts                    # Namespaced config: app.nodeEnv, app.port
+│   │   ├── database.config.ts               # Namespaced config: database.url
+│   │   └── env.validation.ts                # class-validator env schema + validate()
+│   │
+│   ├── common/
+│   │   ├── pipes/
+│   │   │   └── validation.pipe.ts           # Global ValidationPipe (whitelist + transform)
+│   │   └── utils/                           # (Reserved for shared utilities)
+│   │
+│   ├── database/
+│   │   ├── index.ts                         # Barrel export (DatabaseModule, DB_FACADE)
+│   │   ├── database.module.ts               # @Global() module: Prisma client + repositories
+│   │   ├── db-facade.token.ts               # DI token: Symbol('DB_FACADE')
+│   │   └── prisma-users.repository.ts       # Prisma implementation of UsersRepository
+│   │
+│   ├── prisma/
+│   │   ├── contract.prisma                  # Prisma 8 schema (User model)
+│   │   ├── contract.json                    # Emitted contract (auto-generated)
+│   │   ├── contract.d.ts                    # TypeScript types (auto-generated)
+│   │   └── db.ts                            # createDb() factory + Db type
+│   │
+│   └── modules/
+│       └── users/
+│           ├── users.module.ts              # Feature module
+│           ├── users.controller.ts          # REST endpoints: POST, GET, GET /count
+│           ├── users.service.ts             # Business logic layer
+│           ├── users.repository.ts          # Repository interface + USERS_REPOSITORY token
+│           └── dto/
+│               └── create-user.dto.ts       # Validated DTO (name, email)
+│
+├── migrations/
+│   ├── app/
+│   │   ├── 20260916T0900_baseline/          # Baseline migration (creates User table)
+│   │   │   ├── migration.ts                 # Type-safe migration code
+│   │   │   ├── migration.json               # Migration metadata
+│   │   │   └── ops.json                     # Migration operations
+│   │   └── refs/
+│   │       └── db.json                      # Tracks which migration the DB is at
+│   └── snapshots/
+│       └── <hash>/                          # Contract snapshot at migration time
+│           ├── contract.d.ts                # Frozen TypeScript types
+│           └── contract.json                # Frozen contract JSON
+│
+├── test/
+│   └── app.e2e-spec.ts                      # E2E test (supertest)
+│
+├── prisma.config.ts                         # Prisma CLI config (contract path + DB URL)
+├── docker-compose.postgres.yml              # Local PostgreSQL 18 container
+├── tsconfig.json                            # TypeScript 6 config (ESM, NodeNext)
+├── tsconfig.build.json                      # Build-specific TS config
+├── vitest.config.ts                         # Unit test config
+├── vitest.config.e2e.ts                     # E2E test config
+├── nest-cli.json                            # NestJS CLI config
+├── oxlint.json                              # Linter config
+├── .prettierrc                              # Prettier config (singleQuote, trailingComma)
+├── .env.example                             # Environment template
+└── package.json                             # Dependencies & scripts
+```
+
+---
+
+## Architecture
+
+### Layered Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                   HTTP Request                  │
+└───────────────────────┬─────────────────────────┘
+                        ▼
+┌─────────────────────────────────────────────────┐
+│              Controller Layer                   │
+│  (Routing, validation, HTTP concerns)           │
+│  e.g. UsersController                           │
+└───────────────────────┬─────────────────────────┘
+                        ▼
+┌─────────────────────────────────────────────────┐
+│               Service Layer                     │
+│  (Business logic, orchestration)                │
+│  e.g. UsersService                              │
+└───────────────────────┬─────────────────────────┘
+                        ▼
+┌─────────────────────────────────────────────────┐
+│             Repository Layer                    │
+│  (Data access via interface + DI token)         │
+│  Interface: UsersRepository                     │
+│  Implementation: PrismaUsersRepository          │
+└───────────────────────┬─────────────────────────┘
+                        ▼
+┌─────────────────────────────────────────────────┐
+│           Prisma 8 / PostgreSQL                 │
+│  (DB_FACADE → PostgresClient)                   │
+└─────────────────────────────────────────────────┘
+```
+
+### Key Design Patterns
+
+| Pattern                          | Where                                                  | Why                                                                                |
+| -------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| **Repository Pattern**           | `users.repository.ts` (interface) → `prisma-users.repository.ts` (impl) | Decouples business logic from data access; easy to swap Prisma for another ORM      |
+| **DI Token (Symbol)**            | `DB_FACADE`, `USERS_REPOSITORY`                        | Enables interface-based injection (TypeScript interfaces erased at runtime)          |
+| **Global Module**                | `DatabaseModule` (`@Global()`)                         | Prisma client & repositories available everywhere without re-importing              |
+| **Namespaced Config**            | `registerAs('app', ...)`, `registerAs('database', ...)` | Type-safe, structured config access via `ConfigService.get('app.port')`             |
+| **Env Validation at Boot**       | `env.validation.ts`                                    | Fail fast on missing/invalid env vars                                               |
+| **Global Validation Pipe**       | `GlobalValidationPipe` in `main.ts`                    | Whitelist + transform + forbidNonWhitelisted on every incoming request               |
+| **Graceful Shutdown**            | `DatabaseModule.onApplicationShutdown()`               | Closes Prisma DB connection on app shutdown                                         |
+
+### Data Flow Example: `POST /users`
+
+```
+1. Request → UsersController.create(@Body() dto: CreateUserDto)
+2. GlobalValidationPipe validates + transforms the body
+3. Controller delegates to UsersService.create(dto)
+4. Service delegates to UsersRepository.create(dto)  (injected via USERS_REPOSITORY token)
+5. PrismaUsersRepository calls db.orm.public.User.create(dto)
+6. On duplicate email → catches PostgreSQL 23505 → throws ConflictException (409)
+7. Response ← { id, name, email }
+```
+
+---
+
+## API Reference
+
+### Health Check
+
+```
+GET /
+```
+
+**Response:** `200 OK` — `Hello World!`
+
+---
+
+### Users
+
+#### Create User
+
+```
+POST /users
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+| Field   | Type   | Validation                                    |
+| ------- | ------ | --------------------------------------------- |
+| `name`  | string | Required, non-empty, auto-trimmed             |
+| `email` | string | Required, valid email format, auto-trimmed    |
+
+**Responses:**
+
+| Status | Description                              |
+| ------ | ---------------------------------------- |
+| `201`  | User created — returns `{ id, name, email }` |
+| `400`  | Validation error (missing/invalid fields)|
+| `409`  | Conflict — email already exists          |
+
+#### List All Users
+
+```
+GET /users
+```
+
+**Response:** `200 OK` — `User[]`
+
+```json
+[
+  { "id": 1, "name": "John Doe", "email": "john@example.com" }
+]
+```
+
+#### Count Users
+
+```
+GET /users/count
+```
+
+**Response:** `200 OK`
+
+```json
+{ "count": 42 }
+```
+
+---
+
+## Prisma 8 Workflow
+
+This project uses **Prisma 8** (RC) with the new contract-based approach — no more `npx prisma generate`. The schema, contract, and migrations are all TypeScript-native.
+
+### Schema Location
+
+The Prisma schema lives at [`src/prisma/contract.prisma`](src/prisma/contract.prisma):
+
+```prisma
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+}
+```
+
+### Emit Contract (after schema changes)
+
+```bash
+npm run contract:emit
+```
+
+This regenerates:
+- `src/prisma/contract.json` — runtime contract
+- `src/prisma/contract.d.ts` — TypeScript types
+
+### Prisma Client Setup
+
+The Prisma client is created in [`src/prisma/db.ts`](src/prisma/db.ts) via the `createDb(url)` factory. The `DatabaseModule` owns the lifecycle:
+- Creates the client with the database URL from `ConfigService`
+- Closes the connection on application shutdown
+
+### Configuration
+
+CLI configuration is in [`prisma.config.ts`](prisma.config.ts):
+
+```ts
+export default definePrismaConfig({
+  orm: ormConfig({
+    contract: "./src/prisma/contract.prisma",
+    db: {
+      connection: process.env['DATABASE_URL']!,
+    },
+  }),
+});
+```
+
+---
+
+## Database Migrations
+
+Prisma 8 uses **TypeScript-native, type-safe migrations**.
+
+### Commands
+
+```bash
+# Plan a new migration (preview changes)
+npm run migration:plan
+
+# Check migration status
+npm run migration:check
+
+# Apply pending migrations
+npm run db:migrate
+
+# Verify database state
+npm run db:verify
+```
+
+### Migration Structure
+
+```
+migrations/
+├── app/
+│   └── 20260916T0900_baseline/
+│       ├── migration.ts      # Type-safe migration code (createTable, addUnique, etc.)
+│       ├── migration.json    # Metadata
+│       └── ops.json          # Operation details
+└── snapshots/                # Contract snapshots used for diffing
+```
+
+### Workflow
+
+1. Edit `src/prisma/contract.prisma`
+2. Run `npm run contract:emit` to regenerate types
+3. Run `npm run migration:plan` to generate a migration
+4. Review the generated migration in `migrations/app/`
+5. Run `npm run db:migrate` to apply
+
+---
+
+## Testing
+
+The project uses [**Vitest**](https://vitest.dev/) with global test APIs and tsconfig path resolution.
+
+### Unit Tests
+
+```bash
+npm run test           # Run all unit tests
+npm run test:watch     # Watch mode
+npm run test:cov       # With coverage report (v8)
+npm run test:debug     # Debug mode (--inspect-brk)
+```
+
+Config: [`vitest.config.ts`](vitest.config.ts) — matches `**/*.spec.ts`
+
+### E2E Tests
+
+```bash
+npm run test:e2e
+```
+
+Config: [`vitest.config.e2e.ts`](vitest.config.e2e.ts) — matches `**/*.e2e-spec.ts`  
+Uses [supertest](https://github.com/ladjs/supertest) for HTTP assertions.
+
+---
+
+## Scripts Reference
+
+| Command                  | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| `npm run start`          | Start the application                                |
+| `npm run start:dev`      | Start in watch mode (development)                    |
+| `npm run start:debug`    | Start in debug + watch mode                          |
+| `npm run start:prod`     | Start the production build (`dist/main`)             |
+| `npm run build`          | Compile the project via `nest build`                 |
+| `npm run lint`           | Lint `src/` and `test/` with oxlint                  |
+| `npm run format`         | Format code with Prettier                            |
+| `npm run test`           | Run unit tests (Vitest)                              |
+| `npm run test:watch`     | Run tests in watch mode                              |
+| `npm run test:cov`       | Run tests with v8 coverage                           |
+| `npm run test:debug`     | Run tests with inspector for debugging               |
+| `npm run test:e2e`       | Run end-to-end tests                                 |
+| `npm run contract:emit`  | Emit Prisma contract (JSON + types) from schema      |
+| `npm run migration:plan` | Plan a new database migration                        |
+| `npm run migration:check`| Check if migrations are up-to-date                   |
+| `npm run db:migrate`     | Apply pending migrations                             |
+| `npm run db:verify`      | Verify database schema matches contract              |
+
+---
+
+## Configuration Files
+
+| File                  | Purpose                                                       |
+| --------------------- | ------------------------------------------------------------- |
+| `tsconfig.json`       | TypeScript 6 — ESM (`module: nodenext`), strict, decorators   |
+| `tsconfig.build.json` | Build subset — excludes tests, `node_modules`, `dist`         |
+| `nest-cli.json`       | NestJS CLI — `deleteOutDir: true`                             |
+| `prisma.config.ts`    | Prisma 8 CLI — contract path + DB connection                  |
+| `vitest.config.ts`    | Unit tests — globals, tsconfig paths, `*.spec.ts`             |
+| `vitest.config.e2e.ts`| E2E tests — `*.e2e-spec.ts`                                  |
+| `oxlint.json`         | Linter — `no-explicit-any` off, `no-floating-promises` warn  |
+| `.prettierrc`         | Formatter — single quotes, trailing commas                    |
+| `.env.example`        | Environment variable template                                |
+
+---
+
+## Tech Stack
+
+| Category       | Technology                                                              |
+| -------------- | ----------------------------------------------------------------------- |
+| **Framework**  | [NestJS](https://nestjs.com/) v12                                       |
+| **Language**   | TypeScript 6 (ESM, `nodenext` module resolution)                        |
+| **ORM**        | [Prisma 8](https://www.prisma.io/) RC (contract-based, `@prisma/orm-postgres`) |
+| **Database**   | PostgreSQL 18 (via Docker)                                              |
+| **Runtime**    | Node.js ≥ 20                                                           |
+| **Validation** | class-validator + class-transformer                                     |
+| **Testing**    | Vitest 4 + supertest                                                    |
+| **Linting**    | oxlint                                                                  |
+| **Formatting** | Prettier                                                                |
+| **HTTP**       | Express (via `@nestjs/platform-express`)                                |
+| **Config**     | `@nestjs/config` (namespaced, validated)                                |
+
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is [UNLICENSED](package.json).
