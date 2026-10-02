@@ -31,14 +31,14 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   /**
-   * Prisma 8 surfaces native pg errors — unique violations are
-   * PostgreSQL SQLSTATE 23505, not the legacy P2002 code.
+   * Prisma 8 surfaces native pg errors as SqlQueryError — unique
+   * violations carry PostgreSQL SQLSTATE 23505 on the `sqlState` property.
    */
   private isUniqueViolation(error: unknown): boolean {
     return (
       error instanceof Error &&
-      'code' in error &&
-      (error as { code: string }).code === '23505'
+      'sqlState' in error &&
+      (error as { sqlState: string }).sqlState === '23505'
     );
   }
 }
