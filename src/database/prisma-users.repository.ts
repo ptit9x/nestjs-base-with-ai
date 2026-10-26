@@ -1,16 +1,19 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { DB_FACADE } from './db-facade.token.js';
 import type { Db } from '../prisma/db.js';
-import type { UsersRepository, User } from '../modules/users/users.repository.js';
-import type { CreateUserDto } from '../modules/users/dto/create-user.dto.js';
+import type { UsersRepository, User, CreateUserData } from '../modules/users/users.repository.js';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
   constructor(@Inject(DB_FACADE) private readonly db: Db) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(data: CreateUserData): Promise<User> {
     try {
-      return await this.db.orm.public.User.create(dto);
+      return await this.db.orm.public.User.create({
+        name: data.name,
+        email: data.email,
+        passwordHash: data.passwordHash,
+      });
     } catch (error: unknown) {
       if (this.isUniqueViolation(error)) {
         throw new ConflictException('A user with this email already exists');
@@ -21,6 +24,20 @@ export class PrismaUsersRepository implements UsersRepository {
 
   async findAll(): Promise<User[]> {
     return this.db.orm.public.User.all();
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await this.db.orm.public.User.where({ email }).first();
+    return user ?? null;
+  }
+
+  async findById(id: number): Promise<User | null> {
+    const user = await this.db.orm.public.User.where({ id }).first();
+    return user ?? null;
+  }
+
+  async updatePasswordHash(id: number, passwordHash: string): Promise<void> {
+    await this.db.orm.public.User.where({ id }).update({ passwordHash });
   }
 
   async count(): Promise<number> {

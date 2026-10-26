@@ -1,15 +1,22 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
+import { CurrentUser } from '@nestjs/authentication';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
-import type { User } from './users.repository.js';
+import { UserResponseDto } from './dto/user-response.dto.js';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.usersService.create(createUserDto);
+    return UserResponseDto.from(user);
+  }
+
+  @Get('me')
+  me(@CurrentUser() user: UserResponseDto): UserResponseDto {
+    return user;
   }
 
   @Get('count')
@@ -18,8 +25,8 @@ export class UsersController {
   }
 
   @Get()
-  findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.usersService.findAll();
+    return UserResponseDto.fromMany(users);
   }
 }
-

@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsString, Min, validateSync } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsString, Min, MinLength, validateSync } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
 export enum Environment {
@@ -17,6 +17,18 @@ export class EnvironmentVariables {
 
   @IsString()
   DATABASE_URL: string;
+
+  @IsString()
+  @MinLength(32)
+  JWT_ACCESS_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_ISSUER: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_AUDIENCE: string;
 }
 
 export function validate(
